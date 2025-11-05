@@ -1,0 +1,24 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions:
+  # to fetch code (actions/checkout)
+  contents: read
+
+jobs:
+  rustfmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --all --check
