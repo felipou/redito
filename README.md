@@ -1,6 +1,6 @@
-# reto — Redis Toolkit CLI
+# redito — Redis Toolkit CLI
 
-**`reto`** is a command-line utility for working with Redis in a structured and
+**`redito`** is a command-line utility for working with Redis in a structured and
 extensible way. It’s designed to support multiple Redis operations through modular
 subcommands — starting with some tools for working with **Redis Streams**.
 
@@ -20,8 +20,8 @@ useful for others too.
 
 * Supports configuration through:
   * Command-line arguments
-  * Environment variables (prefixed with `RETO_`)
-  * Configuration files (`/etc/reto.toml`, `./.reto.toml`, `reto.toml`, or `local_config.toml`)
+  * Environment variables (prefixed with `REDITO_`)
+  * Configuration files (`/etc/redito.toml`, `./.redito.toml`, `redito.toml`, or `local_config.toml`)
 * TLS and Sentinel connection support.
 * Stream utilities:
   * `stream-tail` — follow a stream like `tail -f`
@@ -41,20 +41,20 @@ cargo install --path .
 Or:
 
 ```bash
-cargo install reto-cli
+cargo install redito
 ```
 
 ---
 
 ## Configuration
 
-`reto` loads configuration in this order (later entries override earlier ones):
+`redito` loads configuration in this order (later entries override earlier ones):
 
-1. `/etc/reto.toml`
-2. `./.reto.toml`
-3. `./reto.toml`
+1. `/etc/redito.toml`
+2. `./.redito.toml`
+3. `./redito.toml`
 4. `local_config.toml`
-5. Environment variables prefixed with `RETO_`
+5. Environment variables prefixed with `REDITO_`
 6. Command-line flags
 
 I intend to use this tool both as an everyday cli tool, and as an automation helper to
@@ -76,7 +76,7 @@ You can override any of these via CLI or environment variables.
 For example:
 
 ```bash
-RETO_REDIS__HOST=redis.example.com reto stream-tail --stream mystream
+REDITO_REDIS__HOST=redis.example.com redito stream-tail --stream mystream
 ```
 
 ---
@@ -88,7 +88,7 @@ RETO_REDIS__HOST=redis.example.com reto stream-tail --stream mystream
 Tails a Redis Stream, continuously reading new entries (similar to `tail -f`).
 
 ```bash
-reto --host localhost stream-tail --stream mystream
+redito --host localhost stream-tail --stream mystream
 ```
 
 **Options:**
@@ -112,7 +112,7 @@ reto --host localhost stream-tail --stream mystream
 Copies entries from a source Redis stream to a target Redis instance.
 
 ```bash
-reto --host src.redis.local stream-copy --stream mystream \
+redito --host src.redis.local stream-copy --stream mystream \
   --target-host dst.redis.local
 ```
 
@@ -140,16 +140,16 @@ reto --host src.redis.local stream-copy --stream mystream \
 
 ## Environment Variables
 
-`reto` recognizes any setting as an environment variable, using the prefix `RETO_`.
+`redito` recognizes any setting as an environment variable, using the prefix `REDITO_`.
 
 Nested fields (like Redis connection options) use double underscores `__`.
 
 Example:
 
 ```bash
-export RETO_REDIS__HOST=redis.example.com
-export RETO_REDIS__PASSWORD=secret
-reto stream-tail --stream mystream
+export REDITO_REDIS__HOST=redis.example.com
+export REDITO_REDIS__PASSWORD=secret
+redito stream-tail --stream mystream
 ```
 
 ---

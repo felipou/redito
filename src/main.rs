@@ -1,8 +1,8 @@
-use reto::settings::Commands;
+use redito::settings::Commands;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let config = reto::settings::load_config()?;
+    let config = redito::settings::load_config()?;
 
     if config.print_config {
         println!("{config:?}")
@@ -11,10 +11,10 @@ async fn main() -> anyhow::Result<()> {
     match &config.command {
         Commands::None => {}
         Commands::StreamTail(_) => {
-            reto::commands::stream_tail::run(config).await?;
+            redito::commands::stream_tail::run(config).await?;
         }
         Commands::StreamCopy(_) => {
-            reto::commands::stream_copy::run(config).await?;
+            redito::commands::stream_copy::run(config).await?;
         }
     }
 

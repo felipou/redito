@@ -65,8 +65,8 @@ pub struct AppConfig {
     pub print_config: bool,
 }
 
-const CONFIG_FILE_BASE_NAME: &str = "reto";
-const ENV_VAR_PREFIX: &str = "RETO_";
+const CONFIG_FILE_BASE_NAME: &str = "redito";
+const ENV_VAR_PREFIX: &str = "REDITO_";
 
 fn default_json() -> serde_json::Value {
     json!({
