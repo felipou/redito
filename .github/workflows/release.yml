@@ -163,8 +163,10 @@ jobs:
 
       - name: Prepare Docker build contexts
         run: |
+          binpath="./dist/redito-x86_64-unknown-linux-musl/redito-${{ env.VERSION }}-x86_64-unknown-linux-musl"
+
           mkdir docker-build
-          cp ./dist/redito-x86_64-unknown-linux-musl ./docker-build/redito
+          cp $binpath ./docker-build/redito
           chmod +x ./docker-build/redito
           cat > docker-build/Dockerfile <<'EOF'
           FROM scratch
@@ -173,7 +175,7 @@ jobs:
           EOF
 
           mkdir docker-build-ubuntu
-          cp ./dist/redito-x86_64-unknown-linux-musl ./docker-build-ubuntu/redito
+          cp $binpath ./docker-build-ubuntu/redito
           chmod +x ./docker-build-ubuntu/redito
           cat > docker-build-ubuntu/Dockerfile <<'EOF'
           FROM ubuntu:latest
