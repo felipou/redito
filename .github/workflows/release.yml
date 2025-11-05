@@ -161,13 +161,22 @@ jobs:
       - name: List downloaded files
         run: ls -R ./dist
 
-      - name: Prepare Docker build context
+      - name: Prepare Docker build contexts
         run: |
           mkdir docker-build
-          mv ./dist/redito-x86_64-unknown-linux-musl ./docker-build/redito
+          cp ./dist/redito-x86_64-unknown-linux-musl ./docker-build/redito
           chmod +x ./docker-build/redito
           cat > docker-build/Dockerfile <<'EOF'
           FROM scratch
+          COPY redito /usr/local/bin/redito
+          ENTRYPOINT ["/usr/local/bin/redito"]
+          EOF
+
+          mkdir docker-build-ubuntu
+          cp ./dist/redito-x86_64-unknown-linux-musl ./docker-build-ubuntu/redito
+          chmod +x ./docker-build-ubuntu/redito
+          cat > docker-build-ubuntu/Dockerfile <<'EOF'
+          FROM ubuntu:latest
           COPY redito /usr/local/bin/redito
           ENTRYPOINT ["/usr/local/bin/redito"]
           EOF
@@ -195,3 +204,14 @@ jobs:
             ${{ env.DOCKERHUB_USER }}/${{ env.IMAGE_NAME }}:latest
             quay.io/${{ env.QUAY_USER }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
             quay.io/${{ env.QUAY_USER }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Build and push ubuntu-based Docker images
+        uses: docker/build-push-action@v6
+        with:
+          context: ./docker-build-ubuntu
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_USER }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}-ubuntu
+            ${{ env.DOCKERHUB_USER }}/${{ env.IMAGE_NAME }}:latest-ubuntu
+            quay.io/${{ env.QUAY_USER }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}-ubuntu
+            quay.io/${{ env.QUAY_USER }}/${{ env.IMAGE_NAME }}:latest-ubuntu
