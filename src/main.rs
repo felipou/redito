@@ -4,6 +4,10 @@ use reto::settings::Commands;
 async fn main() -> anyhow::Result<()> {
     let config = reto::settings::load_config()?;
 
+    if config.print_config {
+        println!("{config:?}")
+    }
+
     match &config.command {
         Commands::None => {}
         Commands::StreamTail(_) => {
