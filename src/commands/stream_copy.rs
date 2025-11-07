@@ -30,12 +30,16 @@ async fn xadd_all(
 ) -> redis::RedisResult<()> {
     let options = StreamAddOptions::default();
 
+    let mut pipe = redis::pipe();
+
     for (stream_name, entries) in data {
         for (entry_id, entry_items) in entries {
-            redis::AsyncCommands::xadd_options(conn, stream_name, entry_id, entry_items, &options)
-                .await?
+            pipe.xadd_options(stream_name, entry_id, entry_items, &options);
         }
     }
+
+    pipe.exec_async(conn).await?;
+
     Ok(())
 }
 
