@@ -53,13 +53,35 @@ pub async fn run(config: AppConfig) -> anyhow::Result<()> {
         std::process::exit(1);
     }
 
-    let mut source_conn = crate::connect::connect(&config.redis).await?;
-    let mut target_conn = crate::connect::connect(&command_config.target).await?;
+    // Installed before connecting, so a stop is honoured at any point.
+    let mut shutdown = crate::shutdown::Shutdown::install()?;
+
+    let connect = async {
+        let source_conn = crate::connect::connect(&config.redis).await?;
+        let target_conn = crate::connect::connect(&command_config.target).await?;
+        redis::RedisResult::Ok((source_conn, target_conn))
+    };
+    let (mut source_conn, mut target_conn) = tokio::select! {
+        signal = shutdown.recv() => {
+            eprintln!("Received {signal} while connecting, exiting");
+            return Ok(());
+        }
+        conns = connect => conns?,
+    };
 
     let mut last_id = command_config.start_id.clone();
 
     loop {
-        let reply = xread(&mut source_conn, &last_id, &command_config).await?;
+        // Stop between batches: a signal interrupts the (blocking) XREAD, but never a batch
+        // that was already read and not yet written to the target.
+        let reply = tokio::select! {
+            biased;
+            signal = shutdown.recv() => {
+                eprintln!("Received {signal}, stopping");
+                break;
+            }
+            reply = xread(&mut source_conn, &last_id, &command_config) => reply?,
+        };
 
         xadd_all(&mut target_conn, &reply).await?;
 

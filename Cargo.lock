@@ -705,6 +705,7 @@ dependencies = [
  "anyhow",
  "clap",
  "figment",
+ "libc",
  "redis",
  "schemars",
  "serde",

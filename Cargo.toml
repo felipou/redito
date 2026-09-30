@@ -18,3 +18,6 @@ anyhow = "1"
 
 [profile.release]
 strip = true
+
+[dev-dependencies]
+libc = "0.2"
