@@ -82,12 +82,32 @@ pub async fn run(config: AppConfig) -> anyhow::Result<()> {
         std::process::exit(1);
     }
 
-    let mut conn = crate::connect::connect(&config.redis).await?;
+    // Installed before connecting, so a stop is honoured at any point.
+    let mut shutdown = crate::shutdown::Shutdown::install()?;
+
+    let conn_fut = crate::connect::connect(&config.redis);
+
+    let mut conn = tokio::select! {
+        signal = shutdown.recv() => {
+            eprintln!("Received {signal} while connecting, exiting");
+            return Ok(());
+        }
+        conn = conn_fut => conn?,
+    };
 
     let mut last_id = command_config.start_id.clone();
 
     loop {
-        let reply = xread(&mut conn, &last_id, &command_config).await?;
+        // Stop between batches: a signal interrupts the (blocking) XREAD, but never a batch
+        // that was already read and not yet written to the target.
+        let reply = tokio::select! {
+            biased;
+            signal = shutdown.recv() => {
+                eprintln!("Received {signal}, stopping");
+                break;
+            }
+            reply = xread(&mut conn, &last_id, &command_config) => reply?,
+        };
 
         print_stream_read_reply(
             &reply,
